@@ -8,6 +8,17 @@ from copy import deepcopy
 from re import split
 from math import ceil
 
+# For flask
+from lieToolbox import RSAlgorithm as rsa
+from lieToolbox import HAlgorithm as ha
+import lieToolbox.DRS_algorithm as drsa
+
+# # For test
+# import RSAlgorithm as rsa
+# import HAlgorithm as ha
+# import DRS_algorithm as drsa
+
+
 """
 Tol = 1e-7
 """
@@ -1397,10 +1408,6 @@ class NilpotentOrbit(Partition):
 
 
 if __name__ == '__main__':
-    import RSAlgorithm as rsa
-    import HAlgorithm as ha
-    import DRS_algorithm as drsa
-    
     lbd1 = Weight([1.1, 2, 0.1, 1.5, 4, 2.5,-1, 7,-3, 6,-8, 5], 'D')
     lbd2 = Weight([4,3,-5,6],'D')
     lbd3 = Weight([3,2,1,-5,-6,7], 'D')
@@ -1431,11 +1438,5 @@ if __name__ == '__main__':
     L_lbd.nilpotentOrbit().show()
     gkdim = L_lbd.GKdim()
     print(gkdim)
-
-else:
-    # For flask
-    from lieToolbox import RSAlgorithm as rsa
-    from lieToolbox import HAlgorithm as ha
-    from lieToolbox import DRS_algorithm as drsa
     
     
