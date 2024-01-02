@@ -4,6 +4,7 @@ import execjs, os
 def w2DominoTableau(w):
     node = execjs.get()
     file_path = os.path.join('lieToolbox', 'Tableau.js')
+    #file_path = os.path.join('Tableau.js')
     with open(file_path, encoding='utf-8') as file:
         ctx2 = node.compile(file.read())
     strw = [str(i) for i in w]

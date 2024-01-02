@@ -1,0 +1,43 @@
+        {% comment %} function draw() {
+            {% if obtInfo %}
+                
+                var p = JSON.parse('{{obtEntry}}');
+                var canvas = document.getElementById("canvas");
+                var borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color'); // Get color from CSS
+                var faceColor = getComputedStyle(document.documentElement).getPropertyValue('--face-color'); // Get color from CSS
+                drawTable(canvas, p, borderColor, faceColor)
+                {% if obtInfo['lieType'] == 'A'%}
+                    let tableNum = JSON.parse('{{obtInfo['UnitList'] | length}}')
+                    for (var i = 0; i < tableNum; i++) {
+                        var p = u['UnitList'][i]['Partition']
+                        var canvas = document.getElementById("table" + String(i+1))
+                        drawTable(canvas, p, borderColor, faceColor)
+                    }
+                {% else %}
+                    var p = u['Integral']['Partition2']
+                    if (p.length > 0){
+                        var canvas = document.getElementById("table11")
+                        drawTable(canvas, p, borderColor, faceColor)
+                    }
+                    var p = u['HIntegral']['Partition2']
+                    if (p.length > 0) {
+                        var canvas = document.getElementById("table12")
+                        drawTable(canvas, p, borderColor, faceColor)
+                    }
+                    let tableNum = JSON.parse('{{obtInfo['NHIntegral'] | length}}')
+                    for (var i = 0; i < tableNum; i++) {
+                        var p = u['NHIntegral'][i]['Partition']
+                        var canvas = document.getElementById("table" + String(i+1))
+                        drawTable(canvas, p, borderColor, faceColor)
+                    }
+                    {% if obtInfo['lieType'] == 'D' and obtInfo['isVeryEven'] == True %}
+                    var rst = u['veryEvenTypeInfo']['Integral']['DominoTableau'];
+                    var canvas = document.getElementById("tabled1");
+                    drawDominoTable(canvas, rst, borderColor, faceColor)
+                    var rst = u['veryEvenTypeInfo']['HIntegral']['DominoTableau'];
+                    var canvas = document.getElementById("tabled2");
+                    drawDominoTable(canvas, rst, borderColor, faceColor)
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        } {% endcomment %}

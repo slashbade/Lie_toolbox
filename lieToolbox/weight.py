@@ -341,13 +341,10 @@ class Weight:
         """
         newlbd = deepcopy(lbd)
         n = len(newlbd.entry)
-        while newlbd.positiveEntry(newlbd.entry) > 1:
-            # print(newlbd)
-            max_idx = newlbd.entry.index(max(newlbd))
-            newlbd[max_idx] = -abs(newlbd[max_idx])
+        while newlbd.positiveEntry(newlbd.entry) > 0:
             max_idx = newlbd.entry.index(max(newlbd.entry))
             newlbd[max_idx] = -abs(newlbd[max_idx])
-            newlbd.entry.sort()
+        newlbd.entry.sort()
         return newlbd
 
     def veryEvenOrbitType(lbd):
@@ -394,6 +391,7 @@ class Weight:
                 veryEvenType = 'II'
             else:
                 veryEvenType = 'None'
+            
             veryEvenTypeInfo = {'Weight': lbd.entry,
                                 'AntidominantWeight': mu.entry,
                                 'WeylGroupElement': wg.entry,
@@ -573,25 +571,35 @@ class WeightStruct:
         elif veryEvenType2 == 'None' and veryEvenType3 == 'None':
             veryEvenType = veryEvenType1
         else:
-            if veryEvenType1 == veryEvenType2:
-                veryEvenType12 = 'I'
+            if veryEvenType1 == 'None':
+                veryEvenType12 = veryEvenType2
+            elif veryEvenType2 == 'None':
+                veryEvenType12 = veryEvenType1
             else:
-                veryEvenType12 = 'II'
+                if veryEvenType1 == veryEvenType2:
+                    veryEvenType12 = 'I'
+                if veryEvenType1 != veryEvenType2:
+                    veryEvenType12 = 'II'
+            
             if veryEvenType3 == 'None' or veryEvenType3 == 'I':
                 veryEvenType = veryEvenType12
-            # Contrary if rest part type is II
+            
             elif veryEvenType3 == 'II':
                 if veryEvenType12 == 'I':
                     veryEvenType = 'II'
                 elif veryEvenType12 == 'II':
                     veryEvenType = 'I'
         
+        # print(veryEvenType1,veryEvenType2,veryEvenType12, veryEvenType3)
         return veryEvenType
     
     def veryEvenOrbitTypeInfo(lbdStruct):
         veryEvenTypeInfo1 = 'None'  # type combined by int part
+        veryEvenType1 = 'None'
         veryEvenTypeInfo2 = 'None'  # type combined by half-int part
+        veryEvenType2 = 'None'
         veryEvenTypeInfoList3 = []  # type contributed by rest part
+        veryEvenType3 = 'None'
         
         # Very even type contributed by int and half-int part
         if len(lbdStruct.Integral.entry) != 0:
@@ -601,6 +609,7 @@ class WeightStruct:
         if len(lbdStruct.HIntegral.entry) != 0:
             veryEvenTypeInfo2 = lbdStruct.HIntegral.veryEvenOrbitTypeInfo()
             veryEvenType2 = veryEvenTypeInfo2['VeryEvenType']
+        
         
         # Very even part contributed by the rest part
         if len(lbdStruct.NHIntegral) != 0:
@@ -622,18 +631,26 @@ class WeightStruct:
         elif veryEvenType2 == 'None' and veryEvenType3 == 'None':
             veryEvenType = veryEvenType1
         else:
-            if veryEvenType1 == veryEvenType2:
-                veryEvenType12 = 'I'
+            if veryEvenType1 == 'None':
+                veryEvenType12 = veryEvenType2
+            elif veryEvenType2 == 'None':
+                veryEvenType12 = veryEvenType1
             else:
-                veryEvenType12 = 'II'
+                if veryEvenType1 == veryEvenType2:
+                    veryEvenType12 = 'I'
+                if veryEvenType1 != veryEvenType2:
+                    veryEvenType12 = 'II'
+            
             if veryEvenType3 == 'None' or veryEvenType3 == 'I':
                 veryEvenType = veryEvenType12
-            # Contrary if rest part type is II
+            
             elif veryEvenType3 == 'II':
                 if veryEvenType12 == 'I':
                     veryEvenType = 'II'
                 elif veryEvenType12 == 'II':
                     veryEvenType = 'I'
+        
+        # print(veryEvenType12, veryEvenType3)
         
         veryEvenTypeInfo = {'veryEvenType': veryEvenType,
                             'Integral': veryEvenTypeInfo1,
@@ -797,26 +814,59 @@ class HighestWeightModule:
                 
         return orbitInfo
     
+    @staticmethod
+    def a_fun(obt: 'Partition', a_fun_type: str):
+        a_fun_val = 0
+        if not obt.entry:
+            return 0
+        
+        if a_fun_type == 'a':
+            for i,ele in enumerate(obt.entry):
+                a_fun_val += i*ele
+        elif a_fun_type == 'b':
+            for i,ele in enumerate(obt.oddEntry()):
+                # print(obt.oddEntry())
+                a_fun_val += i*ele
+        elif a_fun_type == 'd':
+            for i,ele in enumerate(obt.evenEntry()):
+                a_fun_val += i*ele
+        return a_fun_val
+    
     def GKdim(self):
         lbd = self.highestWeight
         lieType = lbd.lieType
         n = lbd.n 
         L_lbd = HighestWeightModule(lbd)
         obt = L_lbd.nilpotentOrbit()
-        afun = 0
+        print(L_lbd.nilpotentOrbitInfo())
+        obt_info = L_lbd.nilpotentOrbitInfo()
+        
         if lieType == 'A':
-            for i,ele in enumerate(obt.entry):
-                afun += i*ele
-            gk_dim = n*(n-1)/2 - afun
-        elif lieType == 'B' or lieType == 'C':
-            for i,ele in enumerate(obt.oddEntry()):
-                afun += i*ele
-            gk_dim = n*n - afun
-        elif lieType == 'D':
-            for i,ele in enumerate(obt.evenEntry()):
-                afun += i*ele
-            gk_dim = n*n -n - afun
-        print(n, afun, obt.entry)
+            partitions = [Partition(d['Partition']) for d in obt_info['UnitList']]
+            gk_dim = n*(n-1)/2
+            for partition in partitions:
+                gk_dim -= HighestWeightModule.a_fun(partition, 'a')
+        else:
+            integral_partition = Partition(obt_info['Integral']['Partition2'])
+            half_integral_partition = Partition(obt_info['HIntegral']['Partition2'])
+            non_integral_partitions = [Partition(d['Partition']) for d in obt_info['NHIntegral']]
+        
+            if lieType == 'B':
+                gk_dim = n*n - (HighestWeightModule.a_fun(integral_partition, 'b')
+                                + HighestWeightModule.a_fun(half_integral_partition, 'b'))
+                for non_integral_partition in non_integral_partitions:
+                    gk_dim -= HighestWeightModule.a_fun(non_integral_partition, 'a')
+            elif lieType == 'C':
+                gk_dim = n*n - (HighestWeightModule.a_fun(integral_partition, 'b')
+                                + HighestWeightModule.a_fun(half_integral_partition, 'd'))
+                for non_integral_partition in non_integral_partitions:
+                    gk_dim -= HighestWeightModule.a_fun(non_integral_partition, 'a')
+            elif lieType == 'D':
+                gk_dim = n*n - n - (HighestWeightModule.a_fun(integral_partition, 'b')
+                                + HighestWeightModule.a_fun(half_integral_partition, 'd'))
+                for non_integral_partition in non_integral_partitions:
+                    gk_dim -= HighestWeightModule.a_fun(non_integral_partition, 'a')
+            # print(n, afun, obt.entry)
         return int(gk_dim)
         
     def GKdimInfo(self):
@@ -825,24 +875,46 @@ class HighestWeightModule:
         n = lbd.n
         L_lbd = HighestWeightModule(lbd)
         obt = L_lbd.nilpotentOrbit()
+        obt_info = L_lbd.nilpotentOrbitInfo()
         afun = 0
         gkDimInfo = {'Weight': lbd.toStr(), 
                      'lieType': lieType, 
                      'n': n, 
                      'Orbit': obt.entry}
+        
         if lieType == 'A':
-            for i,ele in enumerate(obt.entry):
-                afun += i*ele
-            gk_dim = n*(n-1)/2 - afun
-        elif lieType == 'B' or lieType == 'C':
-            for i,ele in enumerate(obt.oddEntry()):
-                afun += i*ele
-            gk_dim = n*n - afun
-        elif lieType == 'D':
-            for i,ele in enumerate(obt.evenEntry()):
-                afun += i*ele
-            gk_dim = n*n -n - afun
-        print(n, afun, obt.entry)
+            partitions = [Partition(d['Partition']) for d in obt_info['UnitList']]
+            gk_dim = n*(n-1)/2
+            for partition in partitions:
+                afun += HighestWeightModule.a_fun(partition, 'a')
+            gk_dim -= afun 
+        
+        else:
+            integral_partition = Partition(obt_info['Integral']['Partition2'])
+            half_integral_partition = Partition(obt_info['HIntegral']['Partition2'])
+            non_integral_partitions = [Partition(d['Partition']) for d in obt_info['NHIntegral']]
+        
+            if lieType == 'B':
+                afun += (HighestWeightModule.a_fun(integral_partition, 'b') + 
+                         HighestWeightModule.a_fun(half_integral_partition, 'b'))
+                for non_integral_partition in non_integral_partitions:
+                    afun += HighestWeightModule.a_fun(non_integral_partition, 'a')
+                gk_dim = n*n - afun
+                
+            elif lieType == 'C':
+                afun += (HighestWeightModule.a_fun(integral_partition, 'b') + 
+                         HighestWeightModule.a_fun(half_integral_partition, 'd'))
+                for non_integral_partition in non_integral_partitions:
+                    afun += HighestWeightModule.a_fun(non_integral_partition, 'a')
+                gk_dim = n*n - afun
+                
+            elif lieType == 'D':
+                afun += (HighestWeightModule.a_fun(integral_partition, 'b') + 
+                         HighestWeightModule.a_fun(half_integral_partition, 'd'))
+                for non_integral_partition in non_integral_partitions:
+                    afun += HighestWeightModule.a_fun(non_integral_partition, 'a')
+                gk_dim = n*n - n - afun
+        
         gkDimInfo['a'] = afun
         gkDimInfo['gkdim'] = gk_dim
         return gkDimInfo
